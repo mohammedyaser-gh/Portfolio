@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Portfolio</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f5f5f5;
+      color: #111;
+    }
+    header {
+      text-align: center;
+      padding: 30px 20px;
+      background: white;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    h1 { margin: 0 0 10px; }
+    .buttons {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .btn {
+      display: inline-block;
+      padding: 10px 18px;
+      background: black;
+      color: white;
+      text-decoration: none;
+      border-radius: 8px;
+    }
+    #viewerContainer {
+      max-width: 1100px;
+      margin: 30px auto;
+      padding: 0 15px;
+    }
+    canvas {
+      width: 100%;
+      height: auto;
+      display: block;
+      margin-bottom: 25px;
+      background: white;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+    }
+    .loading {
+      text-align: center;
+      padding: 40px;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>My Portfolio</h1>
+    <div class="buttons">
+      <a class="btn" href="portfolio.pdf" target="_blank">Download PDF</a>
+    </div>
+  </header>
+
+  <div id="viewerContainer">
+    <div class="loading">Loading portfolio…</div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script>
+    pdfjsLib.GlobalWorkerOptions.workerSrc =
+      'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+    const url = 'portfolio.pdf';
+    const container = document.getElementById('viewerContainer');
+
+    pdfjsLib.getDocument(url).promise.then(pdf => {
+      container.innerHTML = '';
+
+      for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+        pdf.getPage(pageNum).then(page => {
+          const viewport = page.getViewport({ scale: 1.5 });
+          const canvas = document.createElement('canvas');
+          const context = canvas.getContext('2d');
+
+          canvas.width = viewport.width;
+          canvas.height = viewport.height;
+
+          container.appendChild(canvas);
+
+          page.render({
+            canvasContext: context,
+            viewport: viewport
+          });
+        });
+      }
+    }).catch(err => {
+      container.innerHTML = '<div class="loading">Failed to load PDF.</div>';
+      console.error(err);
+    });
+  </script>
+
+</body>
+</html>
